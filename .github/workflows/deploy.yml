@@ -17,9 +17,9 @@ jobs:
           go-version: 1.18
         id: go
 
-      - name: Building application  
+      - name: Testing the application
         run: |
-          go build -o simpleks-backend    
+          go test 
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'                      
