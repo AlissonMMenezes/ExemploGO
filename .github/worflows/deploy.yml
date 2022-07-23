@@ -1,0 +1,47 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [ main ]
+  
+jobs:
+  
+  BuildAndDeploy:    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3          
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+        id: go
+
+      - name: Building application  
+        run: |
+          go build -o simpleks-backend    
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'                      
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY}}'
+
+      - name: Build & Publish
+        run: |
+          gcloud config set project blog-357212
+          gcloud builds submit --tag gcr.io/blog-357212/exemplo-go
+          gcloud config set run/region europe-west1
+
+      - name: Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:          
+          flags: "--port=1323"
+          image: gcr.io/blog-357212/exemplo-go:latest
+          service: exemplo-go          
+          
+            
+    
+          
